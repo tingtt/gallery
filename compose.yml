@@ -1,0 +1,16 @@
+services:
+  gallery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    ports:
+      - ${PORT:-3000}:3000
+    command: ${ARGS:-}
+    restart: unless-stopped
+    volumes:
+      - .:/app
+      - img_data:/var/lib/tingtt_gallery
+
+volumes:
+  img_data:
