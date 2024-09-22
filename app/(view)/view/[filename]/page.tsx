@@ -25,7 +25,7 @@ export default function View({
   const router = useRouter();
 
   useLayoutEffect(() => {
-    fetch("/api/images").then(async (res) => {
+    fetch("/api/images", { cache: "force-cache" }).then(async (res) => {
       if (res.status == 200) {
         const images = (await res.json()) as ImageData[];
         const index = images.findIndex((v) => v.filename == filename);

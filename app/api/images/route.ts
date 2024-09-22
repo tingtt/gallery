@@ -29,12 +29,51 @@ export async function GET() {
   }
 }
 
+class MTimeCache {
+  private static instance?: MTimeCache;
+  private cache: Map<string, number>;
+  private constructor() {
+    this.cache = new Map<string, number>();
+  }
+
+  public static getInstance(): MTimeCache {
+    if (!this.instance) {
+      this.instance = new MTimeCache();
+    }
+    return this.instance;
+  }
+
+  public set(filename: string, num: number) {
+    this.cache.set(filename, num);
+  }
+
+  public get(filename: string): number | undefined {
+    return this.cache.get(filename);
+  }
+}
+
 const sortTimeDesc = (files: string[]) => {
   return files
-    .map((fileName) => ({
-      name: fileName,
-      time: fs.statSync(`${PATH_PICTURES_DIR}/${fileName}`).mtime.getTime(),
-    }))
+    .map((fileName) => {
+      const mtimeCache = MTimeCache.getInstance();
+      const mtime = mtimeCache.get(fileName);
+      if (mtime) {
+        console.log(`inspect image mtime: cache hit (${fileName})`);
+        return {
+          name: fileName,
+          time: mtime,
+        };
+      }
+      console.log(`inspect image mtime: cached (${fileName})`);
+      const mtime_ = fs
+        .statSync(`${PATH_PICTURES_DIR}/${fileName}`)
+        .mtime.getTime();
+      mtimeCache.set(fileName, mtime_);
+      return {
+        name: fileName,
+        time: mtime_,
+      };
+    })
     .sort((a, b) => b.time - a.time)
     .map((file) => file.name);
 };
@@ -45,16 +84,56 @@ const filterOnlySupported = (files: string[]) => {
   );
 };
 
+interface Size {
+  width?: number;
+  height?: number;
+}
+class SizeCache {
+  private static instance?: SizeCache;
+  private cache: Map<string, Size>;
+  private constructor() {
+    this.cache = new Map<string, Size>();
+  }
+
+  public static getInstance(): SizeCache {
+    if (!this.instance) {
+      this.instance = new SizeCache();
+    }
+    return this.instance;
+  }
+
+  public set(filename: string, size: Size) {
+    this.cache.set(filename, size);
+  }
+
+  public get(filename: string): Size | undefined {
+    return this.cache.get(filename);
+  }
+}
+
 const getSize = (files: string[]): ImageData[] => {
   return files.map((fileName): ImageData => {
+    const sizeCache = SizeCache.getInstance();
+    const size = sizeCache.get(fileName);
+    if (size) {
+      console.log(`inspect image size: cache hit (${fileName})`);
+      return {
+        filename: fileName,
+        width: size.width,
+        height: size.height,
+      };
+    }
+    console.log(`inspect image size: cached (${fileName})`);
     try {
       const size = imageSize(`${PATH_PICTURES_DIR}/${fileName}`);
+      sizeCache.set(fileName, { width: size.width, height: size.height });
       return {
         filename: fileName,
         width: size.width,
         height: size.height,
       };
     } catch (error) {
+      sizeCache.set(fileName, {});
       return {
         filename: fileName,
       };
