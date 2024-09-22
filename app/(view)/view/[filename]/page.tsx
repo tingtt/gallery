@@ -2,6 +2,7 @@
 
 import { ImageData } from "@/app/api/images/route";
 import clsx from "clsx";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLayoutEffect, useState } from "react";
@@ -19,6 +20,7 @@ export default function View({
 }: {
   params: { filename: string };
 }): JSX.Element {
+  const [src, setSrc] = useState<ImageData>();
   const [prevFilename, setPrevFilename] = useState("");
   const [nextFilename, setNextFilename] = useState("");
   const [error, setError] = useState("");
@@ -29,6 +31,7 @@ export default function View({
       if (res.status == 200) {
         const images = (await res.json()) as ImageData[];
         const index = images.findIndex((v) => v.filename == filename);
+        setSrc(images[index]);
         if (/* not first */ index != 0) {
           setPrevFilename(images[index - 1].filename);
         }
@@ -104,12 +107,15 @@ export default function View({
           <div />
         )}
       </div>
-      <img
+      <Image
+        alt={filename}
         src={`/api/images/${filename}`}
         className={clsx(
           ["absolute", "top-0"],
           ["object-contain", "h-screen", "w-full"]
         )}
+        width={src?.width}
+        height={src?.height}
       />
     </div>
   );
