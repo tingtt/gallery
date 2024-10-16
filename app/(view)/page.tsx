@@ -4,7 +4,6 @@ import { useLayoutEffect, useState } from "react";
 import clsx from "clsx";
 import Link from "next/link";
 import { ImageData } from "../api/images/route";
-import Image from "next/image";
 
 export default function Gallery(): JSX.Element {
   const [images, setImages] = useState<ImageData[]>([]);
@@ -35,7 +34,7 @@ export default function Gallery(): JSX.Element {
     <div className={clsx("flex", "flex-wrap", "justify-center")}>
       {images.map((image) => (
         <Link href={`/view/${image.filename}`} id={image.filename}>
-          <Image
+          <img
             className={clsx("object-cover", "h-[320px]", "w-[320px]")}
             alt={image.filename}
             src={`/api/images/${image.filename}`}

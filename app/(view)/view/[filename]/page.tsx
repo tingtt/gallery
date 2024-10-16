@@ -2,7 +2,6 @@
 
 import { ImageData } from "@/app/api/images/route";
 import clsx from "clsx";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLayoutEffect, useState } from "react";
@@ -107,7 +106,7 @@ export default function View({
           <div />
         )}
       </div>
-      <Image
+      <img
         alt={filename}
         src={`/api/images/${filename}`}
         className={clsx(
