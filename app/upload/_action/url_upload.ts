@@ -20,10 +20,15 @@ export default async function UploadWithURL(formData: FormData) {
 
     // Split the URL to extract the file extension
     const urlSplitted = url.split(".");
-    const extension = urlSplitted[urlSplitted.length - 1];
+    const extension = ["jpg", "jpeg", "png", "gif"].includes(
+      urlSplitted[urlSplitted.length - 1].split("?")[0]
+    )
+      ? urlSplitted[urlSplitted.length - 1].split("?")[0]
+      : "jpg";
 
     // Generate a unique filename using UUID
     const fileName = `${uuidv4()}.${extension}`;
+    console.log(`New image: ${fileName}`);
     const filePath = path.join(
       env.PERSISTENT_DATA_BASEDIR,
       "Pictures",
