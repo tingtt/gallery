@@ -13,22 +13,22 @@ CMD [ "bun", "dev" ]
 #
 # Builder
 #
-FROM oven/bun:1.3.11 as builder
+FROM node:22-slim as builder
 
 WORKDIR /app
 COPY . .
 
-RUN bun install
-RUN bun run build
+RUN npm ci
+RUN npm run build
 
 #
 # Runner
 #
-FROM oven/bun:1.3.11-slim
+FROM node:22-slim
 
 WORKDIR /app
 COPY --from=builder /app/.next /app/.next
 COPY --from=builder /app/node_modules /app/node_modules
 COPY package.json .
 
-ENTRYPOINT [ "bun", "run", "start" ]
+ENTRYPOINT [ "npm", "run", "start" ]
