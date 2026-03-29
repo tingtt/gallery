@@ -80,7 +80,7 @@ const sortTimeDesc = (files: string[]) => {
 
 const filterOnlySupported = (files: string[]) => {
   return files.filter((fileName) =>
-    [".jpg", ".jpeg", ".png", ".webp", ".mp4"].includes(path.extname(fileName))
+    [".jpg", ".jpeg", ".png", ".webp", ".mp4"].includes(path.extname(fileName)),
   );
 };
 
