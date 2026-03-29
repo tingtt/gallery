@@ -1,7 +1,7 @@
 import Link from "next/link";
-import UploadWithURL from "./_action/url_upload";
-import UploadWithFile from "./_action/file_upload";
 import clsx from "clsx";
+import FileUploadForm from "./_components/FileUploadForm";
+import URLUploadForm from "./_components/URLUploadForm";
 
 export default function Upload(): JSX.Element {
   return (
@@ -11,25 +11,8 @@ export default function Upload(): JSX.Element {
         ["flex", "flex-col", "justify-start", "gap-8"],
       )}
     >
-      <form action={UploadWithFile} className={clsx("flex", "gap-2")}>
-        <input
-          type="file"
-          name="file"
-          accept="image/*,video/mp4"
-          required
-          className={clsx("file-input", "file-input-bordered")}
-        />
-        <input type="submit" value="Upload" className="btn btn-primary" />
-      </form>
-      <form action={UploadWithURL} className={clsx("flex", "gap-2")}>
-        <input
-          type="text"
-          name="url"
-          required
-          className={clsx("input", "input-bordered")}
-        />
-        <input type="submit" value="Submit" className="btn btn-primary" />
-      </form>
+      <FileUploadForm />
+      <URLUploadForm />
       <div className={"mt-auto"} />
       <Link
         href={"/"}
