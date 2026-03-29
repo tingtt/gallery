@@ -13,13 +13,13 @@ CMD [ "bun", "dev" ]
 #
 # Builder
 #
-FROM node:22-slim as builder
+FROM oven/bun:1.3.11 as builder
 
 WORKDIR /app
 COPY . .
 
-RUN npm ci
-RUN npm run build
+RUN bun install
+RUN bun run build
 
 #
 # Runner
