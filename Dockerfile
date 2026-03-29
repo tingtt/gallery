@@ -1,7 +1,7 @@
 #
 # dev
 #
-FROM oven/bun:latest as dev
+FROM oven/bun:1.3.11 as dev
 
 WORKDIR /app
 COPY . .
@@ -13,7 +13,7 @@ CMD [ "bun", "dev" ]
 #
 # Builder
 #
-FROM oven/bun:latest as builder
+FROM oven/bun:1.3.11 as builder
 
 WORKDIR /app
 COPY . .
@@ -24,10 +24,11 @@ RUN bun run build
 #
 # Runner
 #
-FROM oven/bun:latest
+FROM oven/bun:1.3.11-slim
 
 WORKDIR /app
 COPY --from=builder /app/.next /app/.next
 COPY --from=builder /app/node_modules /app/node_modules
 COPY package.json .
+
 ENTRYPOINT [ "bun", "run", "start" ]
