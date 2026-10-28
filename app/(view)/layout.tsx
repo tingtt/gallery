@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import Link from "next/link";
+import GalleryProvider from "./_components/GalleryProvider";
 
 export default function Layout({
   children,
@@ -7,7 +8,7 @@ export default function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
+    <GalleryProvider>
       <Link
         href="/upload"
         className={clsx(
@@ -18,6 +19,6 @@ export default function Layout({
         ↑
       </Link>
       <>{children}</>
-    </>
+    </GalleryProvider>
   );
 }

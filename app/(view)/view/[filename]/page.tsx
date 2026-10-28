@@ -1,10 +1,9 @@
 "use client";
 
-import { ImageData } from "@/app/api/images/route";
 import clsx from "clsx";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useLayoutEffect, useState } from "react";
+import { useGallery } from "../../_components/GalleryProvider";
 
 const STYLE_NEXT_PREV_BTN = clsx(
   "z-10",
@@ -19,33 +18,34 @@ export default function View({
 }: {
   params: { filename: string };
 }): JSX.Element {
-  const [src, setSrc] = useState<ImageData>();
-  const [prevFilename, setPrevFilename] = useState("");
-  const [nextFilename, setNextFilename] = useState("");
-  const [error, setError] = useState("");
+  const { state, remove } = useGallery();
   const router = useRouter();
 
-  useLayoutEffect(() => {
-    fetch("/api/images", { cache: "force-cache" }).then(async (res) => {
-      if (res.status == 200) {
-        const images = (await res.json()) as ImageData[];
-        const index = images.findIndex((v) => v.filename == filename);
-        setSrc(images[index]);
-        if (/* not first */ index != 0) {
-          setPrevFilename(images[index - 1].filename);
-        }
-        if (/* not last */ index != images.length - 1) {
-          setNextFilename(images[index + 1].filename);
-        }
-      } else {
-        setError(((await res.json()) as { error: string }).error);
-      }
-    });
-  }, []);
-
-  if (error != "") {
-    return <div>{error}</div>;
+  if (state.status == "error") {
+    return <div>{state.error}</div>;
   }
+  if (state.status == "loading") {
+    return <div />;
+  }
+
+  const images = state.images;
+  const index = images.findIndex((v) => v.filename == filename);
+  if (index == -1) {
+    return (
+      <div className={clsx("min-h-screen", "flex", "items-end", "p-4")}>
+        <Link
+          href="/"
+          className={clsx("btn", "btn-circle", "btn-ghost", "z-10")}
+        >
+          ←
+        </Link>
+        <p className="m-auto">Image not found</p>
+      </div>
+    );
+  }
+  const src = images[index];
+  const prevFilename = images[index - 1]?.filename ?? "";
+  const nextFilename = images[index + 1]?.filename ?? "";
 
   return (
     <div>
@@ -74,6 +74,7 @@ export default function View({
                       } else {
                         router.push("/");
                       }
+                      remove(filename);
                     }
                   }
                 );

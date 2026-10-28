@@ -1,39 +1,42 @@
 "use client";
 
-import { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useRef } from "react";
 import clsx from "clsx";
 import Link from "next/link";
-import { ImageData } from "../api/images/route";
+import { useGallery } from "./_components/GalleryProvider";
 
 export default function Gallery(): JSX.Element {
-  const [images, setImages] = useState<ImageData[]>([]);
-  const [error, setError] = useState("");
+  const { state } = useGallery();
+  const scrolled = useRef(false);
 
+  // Scroll back to `#filename` once the list (possibly fetched asynchronously)
+  // has rendered the anchor.
   useLayoutEffect(() => {
-    fetch("/api/images").then(async (res) => {
-      if (res.status == 200) {
-        setImages((await res.json()) as ImageData[]);
-      } else {
-        setError(((await res.json()) as { error: string }).error);
-      }
-    });
-  }, []);
-
-  useLayoutEffect(() => {
+    if (scrolled.current || state.status != "ready") {
+      return;
+    }
+    scrolled.current = true;
     const anchorEl = document.getElementById(window.location.hash.slice(1));
     if (anchorEl != undefined) {
       anchorEl.scrollIntoView();
     }
-  }, []);
+  }, [state]);
 
-  if (error != "") {
-    return <div>{error}</div>;
+  if (state.status == "error") {
+    return <div>{state.error}</div>;
+  }
+  if (state.status == "loading") {
+    return <div />;
   }
 
   return (
     <div className={clsx("flex", "flex-wrap", "justify-center")}>
-      {images.map((image) => (
-        <Link href={`/view/${image.filename}`} id={image.filename}>
+      {state.images.map((image) => (
+        <Link
+          key={image.filename}
+          href={`/view/${image.filename}`}
+          id={image.filename}
+        >
           <img
             className={clsx("object-cover", "h-[320px]", "w-[320px]")}
             alt={image.filename}
