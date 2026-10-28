@@ -36,6 +36,7 @@ export default function Gallery(): JSX.Element {
           key={image.filename}
           href={`/view/${image.filename}`}
           id={image.filename}
+          prefetch={false}
         >
           <img
             className={clsx("object-cover", "h-[320px]", "w-[320px]")}
