@@ -2,67 +2,57 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
-import env from "@/constants/env";
-import path from "path";
+import { getContentType, resolvePicturePath } from "@/lib/images/files";
+import {
+  isMissingFileError,
+  notFound,
+  serveFile,
+  serverError,
+} from "@/lib/images/http";
+import { removeThumbnail } from "@/lib/images/thumbnail";
 
 export async function GET(
-  _: NextRequest,
+  request: NextRequest,
   { params: { filename } }: { params: { filename: string } }
 ) {
+  const filePath = resolvePicturePath(filename);
+  if (filePath == undefined) {
+    return notFound();
+  }
   try {
-    const filePath = path.join(
-      env.PERSISTENT_DATA_BASEDIR,
-      "Pictures",
-      filename
-    );
-
-    const file = fs.readFileSync(filePath);
-
-    const header: HeadersInit = {};
-    const contentType = getContentType(path.extname(filename));
-    if (contentType != undefined) {
-      header["Content-Type"] = contentType;
-    }
-    return new NextResponse(file, {
-      status: 200,
-      headers: header,
+    return await serveFile(request, {
+      path: filePath,
+      contentType: getContentType(filename),
     });
   } catch (error) {
-    return new NextResponse("Image not found", { status: 404 });
+    console.error(`read image: failed (${filename})`, error);
+    return serverError();
   }
 }
-
-const getContentType = (extension: string): string | null => {
-  switch (extension) {
-    case ".jpg":
-    case ".jpeg":
-      return "image/jpeg";
-    case ".png":
-      return "image/png";
-    case ".webp":
-      return "image/webp";
-    case ".mp4":
-      return "video/mp4";
-    default:
-      return null;
-  }
-};
 
 export async function DELETE(
   _: NextRequest,
   { params: { filename } }: { params: { filename: string } }
 ) {
-  try {
-    const filePath = path.join(
-      env.PERSISTENT_DATA_BASEDIR,
-      "Pictures",
-      filename
-    );
-    fs.rmSync(filePath);
-    return new NextResponse(null, {
-      status: 200,
-    });
-  } catch (error) {
-    return new NextResponse("Image not found", { status: 404 });
+  const filePath = resolvePicturePath(filename);
+  if (filePath == undefined) {
+    return notFound();
   }
+  try {
+    await fs.promises.rm(filePath);
+  } catch (error) {
+    if (isMissingFileError(error)) {
+      return notFound();
+    }
+    console.error(`delete image: failed (${filename})`, error);
+    return new NextResponse("Failed to delete image", { status: 500 });
+  }
+  // The image is gone at this point; a leftover thumbnail is unreachable
+  // and only wastes space, so it does not fail the request.
+  await removeThumbnail(filename).catch((error: unknown) => {
+    console.error(`delete thumbnail: failed (${filename})`, error);
+  });
+  return new NextResponse(null, {
+    status: 200,
+  });
 }

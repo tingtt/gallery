@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "bun test"
   },
   "dependencies": {
     "@types/uuid": "^10.0.0",
@@ -16,6 +17,7 @@
     "next": "14.2.13",
     "react": "^18",
     "react-dom": "^18",
+    "sharp": "^0.34.5",
     "uuid": "^10.0.0"
   },
   "devDependencies": {

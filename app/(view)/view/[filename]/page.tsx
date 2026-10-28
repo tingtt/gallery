@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { originalSrc } from "@/lib/images/urls";
 import { useGallery } from "../../_components/GalleryProvider";
 
 const STYLE_NEXT_PREV_BTN = clsx(
@@ -68,13 +69,16 @@ export default function View({
               if (confirm("Are you sure you want to permanently delete it?")) {
                 fetch(`/api/images/${filename}`, { method: "DELETE" }).then(
                   (res) => {
-                    if (res.ok) {
+                    // 404: already deleted elsewhere, so drop it as well.
+                    if (res.ok || res.status == 404) {
                       if (prevFilename != "") {
                         router.push(`/#${prevFilename}`);
                       } else {
                         router.push("/");
                       }
                       remove(filename);
+                    } else {
+                      alert("Failed to delete image");
                     }
                   }
                 );
@@ -109,7 +113,7 @@ export default function View({
       </div>
       <img
         alt={filename}
-        src={`/api/images/${filename}`}
+        src={originalSrc(filename)}
         className={clsx(
           ["absolute", "top-0"],
           ["object-contain", "h-screen", "w-full"]
