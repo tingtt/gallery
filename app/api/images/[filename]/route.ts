@@ -18,7 +18,12 @@ export async function GET(
 
     const file = fs.readFileSync(filePath);
 
-    const header: HeadersInit = {};
+    const header: HeadersInit = {
+      // Only the browser may cache (the app is behind oauth2rbac); the short
+      // lifetime bounds how long a deleted image or logged-out session can
+      // still be shown from the cache.
+      "Cache-Control": "private, max-age=300",
+    };
     const contentType = getContentType(path.extname(filename));
     if (contentType != undefined) {
       header["Content-Type"] = contentType;
@@ -28,7 +33,10 @@ export async function GET(
       headers: header,
     });
   } catch (error) {
-    return new NextResponse("Image not found", { status: 404 });
+    return new NextResponse("Image not found", {
+      status: 404,
+      headers: { "Cache-Control": "no-store" },
+    });
   }
 }
 
