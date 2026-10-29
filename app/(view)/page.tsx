@@ -3,7 +3,6 @@
 import { useLayoutEffect, useRef } from "react";
 import clsx from "clsx";
 import Link from "next/link";
-import { thumbnailSrc } from "@/lib/images/urls";
 import { useGallery } from "./_components/GalleryProvider";
 
 export default function Gallery(): JSX.Element {
@@ -42,7 +41,7 @@ export default function Gallery(): JSX.Element {
           <img
             className={clsx("object-cover", "h-[320px]", "w-[320px]")}
             alt={image.filename}
-            src={thumbnailSrc(image.filename)}
+            src={`/api/images/${image.filename}`}
             width={image.width ?? 320}
             height={image.height ?? 320}
             loading="lazy"
